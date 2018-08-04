@@ -5,6 +5,7 @@
 
 double gcd(double a, double b);
 double torad(double a);
+double todeg(double a);
 
 void print_loc();
 
@@ -68,31 +69,31 @@ int main(int argc, char** argv)
 			}
 			if (strcmp(line, "!functions") == 0 || strcmp(line, "!f") == 0)
 			{
-				printf("---- exp(a)      - Same as exp in math.h.\n");
-				printf("---- sin(a)      - Same as sin in math.h, so a is a radian.\n");
-				printf("---- cos(a)      - Same as cos in math.h, so a is a radian.\n");
-				printf("---- torad()     - Converts degrees to radians.\n");
-				printf("---- tan(a)      - To be written (look up 'math.h')\n");
-				printf("---- sinh(a)     - To be written (look up 'math.h')\n");
-				printf("---- cosh(a)     - To be written (look up 'math.h')\n");
-				printf("---- tanh(a)     - To be written (look up 'math.h')\n");
-				printf("---- asin(a)     - To be written (look up 'math.h')\n");
-				printf("---- acos(a)     - To be written (look up 'math.h')\n");
-				printf("---- log(a)      - To be written (look up 'math.h')\n");
-				printf("---- floor(a)    - To be written (look up 'math.h')\n");
 				printf("---- abs(a)      - To be written (look up 'math.h')\n");
-				printf("---- fabs(a)     - To be written (look up 'math.h')\n");
-				printf("---- ceil(a)     - To be written (look up 'math.h')\n");
-				printf("---- sqrt(a)     - To be written (look up 'math.h')\n");
-				printf("---- log10(a)    - To be written (look up 'math.h')\n");
+				printf("---- acos(a)     - To be written (look up 'math.h')\n");
+				printf("---- asin(a)     - To be written (look up 'math.h')\n");
 				printf("---- atan(a)     - To be written (look up 'math.h')\n");
 				printf("---- atan2(a, b) - To be written (look up 'math.h')\n");
-				printf("---- ldexp(a, b) - To be written (look up 'math.h')\n");
-				printf("---- pow(a, b)   - To be written (look up 'math.h')\n");
-				printf("---- mod(a, b)   - To be written (look up 'math.h')\n");
+				printf("---- ceil(a)     - To be written (look up 'math.h')\n");
+				printf("---- cos(a)      - Same as cos in math.h, so a is a radian.\n");
+				printf("---- cosh(a)     - To be written (look up 'math.h')\n");
+				printf("---- fabs(a)     - To be written (look up 'math.h')\n");
+				printf("---- floor(a)    - To be written (look up 'math.h')\n");
 				printf("---- fmod(a, b)  - To be written (look up 'math.h')\n");
 				printf("---- gcd(a, b)   - a and b are rounded to the nearest integer. Look up 'gcd' if you are unsure what it does.\n");
-
+				printf("---- ldexp(a, b) - To be written (look up 'math.h')\n");
+				printf("---- log(a)      - To be written (look up 'math.h')\n");
+				printf("---- log10(a)    - To be written (look up 'math.h')\n");
+				printf("---- mod(a, b)   - To be written (look up 'math.h')\n");
+				printf("---- pow(a, b)   - To be written (look up 'math.h')\n");
+				printf("---- sin(a)      - Same as sin in math.h, so a is a radian.\n");
+				printf("---- sinh(a)     - To be written (look up 'math.h')\n");
+				printf("---- sqrt(a)     - To be written (look up 'math.h')\n");
+				printf("---- tan(a)      - To be written (look up 'math.h')\n");
+				printf("---- tanh(a)     - To be written (look up 'math.h')\n");
+				printf("---- todeg(a)    - Converts degrees to radians.\n");
+				printf("---- torad(a)    - Converts degrees to radians.\n");
+				printf("---- exp(a)      - Same as exp in math.h.\n");
 			}
 			else
 			{
@@ -404,6 +405,23 @@ double t()
 		else if (strcmp(name, "floor") == 0)
 		{
 			double ret = floor(f());
+			if (line[line_i] != ')')
+			{
+				// ERROR
+				printf(">>>> ");
+				printf("Error!\n");
+				printf(">>>> ");
+				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				print_loc();
+				error = 23;
+				return 0.0;
+			}
+			line_i++;
+			return ret;
+		}
+		else if (strcmp(name, "todeg") == 0)
+		{
+			double ret = todeg(f());
 			if (line[line_i] != ')')
 			{
 				// ERROR
@@ -819,6 +837,11 @@ int gcd_i(int a, int b)
 double gcd(double a, double b)
 {
 	return (double)(gcd_i((int)(a + 0.5), (int)(b + 0.5)));
+}
+
+double todeg(double a)
+{
+	return a/(2*M_PI)*360;
 }
 
 double torad(double a)
