@@ -4,6 +4,7 @@
 #include <math.h>
 
 double gcd(double a, double b);
+double torad(double a);
 
 void print_loc();
 
@@ -70,6 +71,7 @@ int main(int argc, char** argv)
 				printf("---- exp(a)      - Same as exp in math.h.\n");
 				printf("---- sin(a)      - Same as sin in math.h, so a is a radian.\n");
 				printf("---- cos(a)      - Same as cos in math.h, so a is a radian.\n");
+				printf("---- torad()     - Converts degrees to radians.\n");
 				printf("---- tan(a)      - To be written (look up 'math.h')\n");
 				printf("---- sinh(a)     - To be written (look up 'math.h')\n");
 				printf("---- cosh(a)     - To be written (look up 'math.h')\n");
@@ -467,6 +469,23 @@ double t()
 			line_i++;
 			return ret;
 		}
+		else if (strcmp(name, "torad") == 0)
+		{
+			double ret = torad(f());
+			if (line[line_i] != ')')
+			{
+				// ERROR
+				printf(">>>> ");
+				printf("Error!\n");
+				printf(">>>> ");
+				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				print_loc();
+				error = 23;
+				return 0.0;
+			}
+			line_i++;
+			return ret;
+		}
 		else if (strcmp(name, "sqrt") == 0)
 		{
 			double ret = sqrt(f());
@@ -800,5 +819,10 @@ int gcd_i(int a, int b)
 double gcd(double a, double b)
 {
 	return (double)(gcd_i((int)(a + 0.5), (int)(b + 0.5)));
+}
+
+double torad(double a)
+{
+	return a/360.0*2*M_PI;
 }
 
