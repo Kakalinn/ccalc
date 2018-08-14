@@ -29,7 +29,7 @@ int inppar_scmp(char* longer, char* shorter)
 	}
 }
 
-int inppar_fetchf(int argc, char** argv, char* target, char* src)
+int inppar_fetchs(int argc, char** argv, char* target, char* src)
 {
 	int i, j;
 
@@ -50,6 +50,7 @@ int inppar_fetchf(int argc, char** argv, char* target, char* src)
 		}
 	}
 
+	src[0] = '\0';
 	return 0;
 }
 
