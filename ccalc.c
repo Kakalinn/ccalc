@@ -1,3 +1,6 @@
+#define INPPAR_STRICT
+#define INPPAR_EXIT_ON_WARNING
+#include "inppar.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -22,17 +25,83 @@ char* line;
 int line_i;
 int error;
 
+int arg_s = 0;
+int arg_h = 0;
+int arg_x = 0;
+int arg_l = 1024;
+char arg_f[128];
+
+FILE* fp_out;
+FILE* fp_in;
+
 int main(int argc, char** argv)
 {
+	fp_out = stdout;
+	fp_in = stdin;
 	inp = argv;
 	double ret = 0;
 
-	line = malloc(sizeof(char)*1024);
+	inppar_fetchb(argc, argv, "-s", &arg_s);
+
+	inppar_fetchb(argc, argv, "-h", &arg_h);
+
+	inppar_fetchi(argc, argv, "-l", &arg_l);
+
+	inppar_fetchf(argc, argv, "-if", &(arg_f[0]));
+	if (arg_f[0] != '\0')
+	{
+		printf("~~~in: %s\n", arg_f);
+		fp_in = fopen(arg_f, "r");
+		if (fp_in == NULL)
+		{
+			// ERROR
+			printf(">>>> ");
+			printf("Error!\n");
+			printf(">>>> ");
+			printf("Could not open input file '%s'\n", arg_f);
+		}
+	}
+
+	inppar_fetchf(argc, argv, "-of", &(arg_f[0]));
+	if (arg_f[0] != '\0')
+	{
+		printf("~~~out: %s\n", arg_f);
+		fp_out = fopen(arg_f, "w");
+		if (fp_out == NULL)
+		{
+			// ERROR
+			printf(">>>> ");
+			printf("Error!\n");
+			printf(">>>> ");
+			printf("Could not open output file '%s'\n", arg_f);
+		}
+	}
+
+	if (arg_h == 1)
+	{
+		printf("Options:\n");
+		printf("  -h        - Brings up this prompt and exits.\n");
+		printf("  -s        - Use simple mode. In simple mode only the evaluation of the expression is put on the output.\n");
+		printf("              default = 0.\n");
+		printf("  -l<num>   - Sets the maximum line length to <num>.\n");
+		printf("              Inputting a line longer than the maximum is undefined (read 'not recommended').\n");
+		printf("              default = 1024\n");
+		printf("  -if<str>  - Sets <str> as the output file.\n");
+		printf("              default = stdin\n");
+		printf("  -of<str>  - Sets <str> as the input file.\n");
+		printf("              default = stdout\n");
+		exit(23);
+	}
+
+	line = malloc(sizeof(char)*arg_l);
 
 	while (!should_end)
 	{
 		error = 0;
-		printf("~ ");
+		if (arg_s == 0)
+		{
+			printf("~ ");
+		}
 		char c = getchar();
 
 		if (c == EOF)
@@ -61,13 +130,14 @@ int main(int argc, char** argv)
 				printf("---- Some helpful information:\n");
 				printf("---- !help, !h     - Some helpful information.\n");
 				printf("---- !funcions, !f - Supported functions.\n");
+				printf("---- !quit, !q     - Quit.\n");
 
 			}
 			else if (strcmp(line, "!quit") == 0 || strcmp(line, "!q") == 0)
 			{
 				break;
 			}
-			if (strcmp(line, "!functions") == 0 || strcmp(line, "!f") == 0)
+			else if (strcmp(line, "!functions") == 0 || strcmp(line, "!f") == 0)
 			{
 				printf("---- abs(a)      - To be written (look up 'math.h')\n");
 				printf("---- acos(a)     - To be written (look up 'math.h')\n");
@@ -109,7 +179,11 @@ int main(int argc, char** argv)
 			double val = f();
 			if (error == 0)
 			{
-				printf("= %f\n", val);
+				if (arg_s == 0)
+				{
+					fprintf(fp_out, "= ");
+				}
+				fprintf(fp_out, "%f\n", val);
 			}
 		}
 	}
@@ -126,7 +200,7 @@ double f()
 	while (1)
 	{
 		char c = line[line_i];
-		//printf("---Line %d: %c was read\n", __LINE__, c);
+		//fprintf(fp_out, "---Line %d: %c was read\n", __LINE__, c);
 
 		if (c == '+')
 		{
@@ -374,10 +448,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -391,10 +465,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -408,10 +482,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -425,10 +499,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -442,10 +516,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -459,10 +533,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -476,10 +550,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -493,10 +567,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -510,10 +584,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -527,10 +601,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -544,10 +618,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -561,10 +635,10 @@ double t()
 			if (line[line_i] != ',')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -577,10 +651,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -594,10 +668,10 @@ double t()
 			if (line[line_i] != ',')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -610,10 +684,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -627,10 +701,10 @@ double t()
 			if (line[line_i] != ',')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -643,10 +717,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -660,10 +734,10 @@ double t()
 			if (line[line_i] != ',')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -676,10 +750,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -693,10 +767,10 @@ double t()
 			if (line[line_i] != ',')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -709,10 +783,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -726,10 +800,10 @@ double t()
 			if (line[line_i] != ',')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ',' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -742,10 +816,10 @@ double t()
 			if (line[line_i] != ')')
 			{
 				// ERROR
-				printf(">>>> ");
-				printf("Error!\n");
-				printf(">>>> ");
-				printf("Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Expected ')' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
 				print_loc();
 				error = 23;
 				return 0.0;
@@ -756,10 +830,10 @@ double t()
 		else
 		{
 			// ERROR
-			printf(">>>> ");
-			printf("Error!\n");
-			printf(">>>> ");
-			printf("Unknown function %s\n", inp[0], name);
+			fprintf(fp_out, ">>>> ");
+			fprintf(fp_out, "Error!\n");
+			fprintf(fp_out, ">>>> ");
+			fprintf(fp_out, "Unknown function %s\n", inp[0], name);
 			print_loc();
 			error = 33;
 			return 0.0;
@@ -768,10 +842,10 @@ double t()
 	else
 	{
 		// ERROR
-		printf(">>>> ");
-		printf("Error!\n");
-		printf(">>>> ");
-		printf("Expected a number or parenthesis\n", inp[0], line[line_i]);
+		fprintf(fp_out, ">>>> ");
+		fprintf(fp_out, "Error!\n");
+		fprintf(fp_out, ">>>> ");
+		fprintf(fp_out, "Expected a number or parenthesis\n", inp[0], line[line_i]);
 		print_loc();
 		error = 11;
 		return 0.0;
@@ -811,15 +885,15 @@ double num()
 void print_loc()
 {
 	int i;
-	printf(">>>> ");
-	printf("%s\n", line);
-	printf(">>>> ");
+	fprintf(fp_out, ">>>> ");
+	fprintf(fp_out, "%s\n", line);
+	fprintf(fp_out, ">>>> ");
 	for (i = 0; i < line_i; i++)
 	{
-		putchar(' ');
+		fputc(' ', fp_out);
 	}
-	putchar('^');
-	putchar(10);
+	fputc('^', fp_out);
+	fputc(10, fp_out);
 }
 
 int gcd_i(int a, int b)
