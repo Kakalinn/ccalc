@@ -28,6 +28,7 @@ int error;
 int arg_s = 0;
 int arg_h = 0;
 int arg_x = 0;
+int arg_r = 0;
 int arg_l = 1024;
 char arg_f[128];
 
@@ -47,7 +48,9 @@ int main(int argc, char** argv)
 
 	inppar_fetchi(argc, argv, "-l", &arg_l);
 
-	inppar_fetchf(argc, argv, "-if", &(arg_f[0]));
+	inppar_fetchb(argc, argv, "-r", &arg_r);
+
+	inppar_fetchs(argc, argv, "-if", &(arg_f[0]));
 	if (arg_f[0] != '\0')
 	{
 		printf("~~~in: %s\n", arg_f);
@@ -62,7 +65,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	inppar_fetchf(argc, argv, "-of", &(arg_f[0]));
+	inppar_fetchs(argc, argv, "-of", &(arg_f[0]));
 	if (arg_f[0] != '\0')
 	{
 		printf("~~~out: %s\n", arg_f);
@@ -82,6 +85,7 @@ int main(int argc, char** argv)
 		printf("Options:\n");
 		printf("  -h        - Brings up this prompt and exits.\n");
 		printf("  -s        - Use simple mode. In simple mode only the evaluation of the expression is put on the output.\n");
+		printf("  -r        - Round the output. This means the output will always be an integer.\n");
 		printf("              default = 0.\n");
 		printf("  -l<num>   - Sets the maximum line length to <num>.\n");
 		printf("              Inputting a line longer than the maximum is undefined (read 'not recommended').\n");
@@ -98,11 +102,11 @@ int main(int argc, char** argv)
 	while (!should_end)
 	{
 		error = 0;
-		if (arg_s == 0)
+		if (arg_s == 0 && fp_in == stdin)
 		{
-			printf("~ ");
+			fprintf(fp_out, "~ ");
 		}
-		char c = getchar();
+		char c = fgetc(fp_in);
 
 		if (c == EOF)
 		{
@@ -114,11 +118,11 @@ int main(int argc, char** argv)
 		{
 			while (c == ' ' || c == '\t')
 			{
-				c = getchar();
+				c = fgetc(fp_in);
 			}
 
 			line[line_i++] = c;
-			c = getchar();
+			c = fgetc(fp_in);
 		}
 		line[line_i] = '\0';
 		line_i = 0;
@@ -183,7 +187,15 @@ int main(int argc, char** argv)
 				{
 					fprintf(fp_out, "= ");
 				}
-				fprintf(fp_out, "%f\n", val);
+
+				if (arg_r == 0)
+				{
+					fprintf(fp_out, "%f\n", val);
+				}
+				else
+				{
+					fprintf(fp_out, "%d\n", (int)(val + 0.5));
+				}
 			}
 		}
 	}
@@ -279,6 +291,10 @@ double t()
 	{
 		// NUM
 		return num();
+	}
+	else if (line[line_i] == '\0')
+	{
+		return 0.0;
 	}
 	else if (line[line_i] >= 'a' && line[line_i] <= 'z')
 	{
