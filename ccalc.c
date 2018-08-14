@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include <math.h>
 
+#ifndef FILENAME_BUFFER_LENGTH
+#define FILENAME_BUFFER_LENGTH 128
+#endif
+
 double gcd(double a, double b);
 double torad(double a);
 double todeg(double a);
@@ -30,7 +34,7 @@ int arg_h = 0;
 int arg_x = 0;
 int arg_r = 0;
 int arg_l = 1024;
-char arg_f[128];
+char arg_f[FILENAME_BUFFER_LENGTH];
 
 FILE* fp_out;
 FILE* fp_in;
@@ -311,14 +315,34 @@ double t()
 
 		if (line[line_i] != '(')
 		{
-			// ERROR
-			printf(">>>> ");
-			printf("Error!\n");
-			printf(">>>> ");
-			printf("Expected '(' but got '%c' (%d)\n", inp[0], line[line_i], line[line_i]);
-			print_loc();
-			error = 23;
-			return 0.0;
+			if (strcmp(name, "M_PI") == 0)
+			{
+				return M_PI;
+			}
+			else if (strcmp(name, "pi") == 0)
+			{
+				return M_PI;
+			}
+			else if (strcmp(name, "M_E") == 0)
+			{
+				return M_E;
+			}
+			else if (strcmp(name, "e") == 0)
+			{
+				return M_E;
+			}
+			else
+			{
+				// ERROR
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Error!\n");
+				fprintf(fp_out, ">>>> ");
+				fprintf(fp_out, "Unknown conastant: %s\n", name);
+				print_loc();
+				error = 34;
+				return 0.0;
+			}
+
 		}
 		line_i++;
 
@@ -849,7 +873,7 @@ double t()
 			fprintf(fp_out, ">>>> ");
 			fprintf(fp_out, "Error!\n");
 			fprintf(fp_out, ">>>> ");
-			fprintf(fp_out, "Unknown function %s\n", inp[0], name);
+			fprintf(fp_out, "Unknown function: %s\n", name);
 			print_loc();
 			error = 33;
 			return 0.0;
