@@ -1,5 +1,5 @@
 #ifndef WRAPPER_INPPAR
-#define WARPPER_INPPAR
+#define WRAPPER_INPPAR
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
