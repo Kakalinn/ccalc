@@ -28,6 +28,7 @@ char** inp;
 char* line;
 int line_i;
 int error;
+double ans;
 
 int arg_s = 0;
 int arg_h = 0;
@@ -184,7 +185,7 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			double val = f();
+			ans = f();
 			if (error == 0)
 			{
 				if (arg_s == 0)
@@ -194,11 +195,11 @@ int main(int argc, char** argv)
 
 				if (arg_r == 0)
 				{
-					fprintf(fp_out, "%f\n", val);
+					fprintf(fp_out, "%f\n", ans);
 				}
 				else
 				{
-					fprintf(fp_out, "%d\n", (int)(val + 0.5));
+					fprintf(fp_out, "%d\n", (int)(ans + 0.5));
 				}
 			}
 		}
@@ -300,12 +301,12 @@ double t()
 	{
 		return 0.0;
 	}
-	else if (line[line_i] >= 'a' && line[line_i] <= 'z')
+	else if (line[line_i] >= 'a' && line[line_i] <= 'z' || line[line_i] >= 'A' && line[line_i] <= 'Z' || line[line_i] == '_')
 	{
 		char name[512];
 		char name_i = 0;
 
-		while (line[line_i] >= 'a' && line[line_i] <= 'z' || line[line_i] >= '0' && line[line_i] <= '9')
+		while (line[line_i] >= 'a' && line[line_i] <= 'z' || line[line_i] >= '0' && line[line_i] <= '9' || line[line_i] >= 'A' && line[line_i] <= 'Z' || line[line_i] == '_')
 		{
 			name[name_i] = line[line_i];
 			name_i++;
@@ -330,6 +331,14 @@ double t()
 			else if (strcmp(name, "e") == 0)
 			{
 				return M_E;
+			}
+			else if (strcmp(name, "ans") == 0)
+			{
+				return ans;
+			}
+			else if (strcmp(name, "ANS") == 0)
+			{
+				return ans;
 			}
 			else
 			{
